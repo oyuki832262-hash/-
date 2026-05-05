@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>アサーション自己練習アプリ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  /* ── 暖色ベース ── */
+  --bg:       #fffaf6;          /* 温かみのある白 */
+  --bg2:      #fdf0e6;          /* 薄いアプリコット */
+  --bg3:      #fae8d4;          /* 背景：桃色がかったクリーム */
+  --bg-card:  #ffffff;
+
+  --text:     #3d2b1f;          /* 深いこげ茶 */
+  --text2:    #7a5c4a;          /* 中間ブラウン */
+  --text3:    #b08c78;          /* 薄いテラコッタ */
+
+  --border:   rgba(180,110,70,0.18);
+  --border2:  rgba(180,110,70,0.32);
+
+  --radius:   14px;
+  --radius-sm: 9px;
+
+  /* アクセントカラー（暖色系） */
+  --primary:        #c0622a;    /* テラコッタ：メインボタン */
+  --primary-light:  #fbe8d8;
+  --primary-hover:  #a84f20;
+
+  --apricot:        #f5a263;    /* アプリコット：完了ドット */
+  --apricot-light:  #fef0e3;
+
+  --rose:           #e07070;    /* ローズ：上級バッジ */
+  --rose-light:     #fdeaea;
+  --rose-dark:      #9c3a3a;
+
+  --gold:           #c98a2a;    /* ゴールド：中級バッジ */
+  --gold-light:     #fef3d8;
+  --gold-dark:      #7a5010;
+
+  --sage:           #7a9e7e;    /* セージグリーン：初級バッジ・良い例文 */
+  --sage-light:     #eaf3eb;
+  --sage-dark:      #3d6642;
+
+  --lavender:       #c4829a;    /* ラベンダーローズ：自己理解バッジ */
+  --lavender-light: #faeef3;
+  --lavender-dark:  #7a3a52;
+
+  --why-color:      #b06040;    /* なぜ欄ラベル */
+  --hint-border:    #e0a882;
+}
+
+body {
+  font-family: 'Noto Sans JP', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg3);
+  background-image:
+    radial-gradient(ellipse at 10% 0%, #fde8cc 0%, transparent 55%),
+    radial-gradient(ellipse at 90% 100%, #fcd8c8 0%, transparent 55%);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 1.5rem 1rem 3rem;
+}
+.wrap { max-width: 640px; margin: 0 auto; }
+
+/* ── APP TITLE ── */
+.app-header { text-align: center; margin-bottom: 1.5rem; }
+.app-title { font-size: 17px; font-weight: 700; color: var(--primary); letter-spacing: .03em; }
+.app-tagline { font-size: 12px; color: var(--text3); margin-top: 3px; }
+
+/* ── TOP BAR ── */
+.top-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.level-pill { font-size: 11px; font-weight: 700; padding: 5px 13px; border-radius: 20px; white-space: nowrap; letter-spacing: .04em; }
+.pill-self   { background: var(--lavender-light); color: var(--lavender-dark); border: 1px solid #e8c0cc; }
+.pill-easy   { background: var(--sage-light);     color: var(--sage-dark);     border: 1px solid #c0dac0; }
+.pill-medium { background: var(--gold-light);     color: var(--gold-dark);     border: 1px solid #f0d090; }
+.pill-hard   { background: var(--rose-light);     color: var(--rose-dark);     border: 1px solid #f0b0b0; }
+.pill-desc   { background: #fbe8d8;               color: #7a3010;              border: 1px solid #f0b888; }
+
+.level-dots { display: flex; gap: 4px; flex: 1; }
+.dot { height: 7px; flex: 1; border-radius: 4px; background: rgba(180,110,70,0.15); border: none; cursor: pointer; transition: background 0.28s; }
+.dot.done   { background: var(--apricot); }
+.dot.active { background: var(--primary); }
+.dot:hover  { background: #e8a070; }
+
+.reset-btn {
+  font-size: 12px; color: var(--text2); background: var(--bg-card);
+  border: 1px solid var(--border2); border-radius: var(--radius-sm);
+  padding: 5px 12px; cursor: pointer; font-family: inherit;
+}
+.reset-btn:hover { background: var(--bg2); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+  margin-bottom: 1rem;
+  animation: rise 0.22s ease;
+  box-shadow: 0 2px 12px rgba(160,80,40,0.07);
+}
+@keyframes rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.card-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .08em;
+  display: flex; justify-content: space-between; margin-bottom: 12px;
+}
+.cat-tag {
+  background: var(--apricot-light); color: var(--primary);
+  padding: 3px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em;
+}
+.badge-tag {
+  background: var(--bg2); color: var(--text3);
+  padding: 3px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600;
+}
+
+.card-q { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.5; margin-bottom: 6px; }
+.card-sub { font-size: 12px; color: var(--why-color); margin-bottom: 14px; font-weight: 500; }
+
+.card-detail {
+  font-size: 13px; color: var(--text2);
+  background: var(--bg2);
+  border-left: 3px solid var(--apricot);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 10px 13px; margin-bottom: 12px; line-height: 1.7;
+}
+.card-prompt {
+  font-size: 13px; color: var(--text2); font-style: italic;
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 13px; margin-bottom: 14px; line-height: 1.7;
+  border-left: 3px solid var(--primary);
+}
+
+.hint {
+  font-size: 12px; color: var(--text2);
+  border-left: 2px solid var(--hint-border);
+  background: #fff8f2;
+  padding: 7px 11px; margin-bottom: 13px; line-height: 1.6;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.tips-box {
+  background: var(--sage-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 13px;
+  margin-bottom: 14px;
+  border-left: 3px solid var(--sage);
+}
+.tips-title { font-size: 11px; font-weight: 700; color: var(--sage-dark); margin-bottom: 6px; letter-spacing: .06em; }
+.tip { font-size: 13px; color: #4a6e4e; line-height: 1.6; padding: 2px 0; }
+.tip::before { content: '✦ '; color: var(--sage); font-size: 10px; }
+
+/* ── L1 PROGRESS DOTS ── */
+.l1-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 14px; }
+.l1-dot { width: 9px; height: 9px; border-radius: 5px; background: rgba(180,110,70,0.2); cursor: pointer; transition: all 0.25s; }
+.l1-dot.filled  { background: var(--apricot); }
+.l1-dot.current { background: var(--primary); width: 22px; }
+
+/* ── INPUTS ── */
+textarea {
+  width: 100%; min-height: 88px; padding: 11px 13px;
+  font-size: 14px; font-family: inherit;
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  background: #fffcf9;
+  color: var(--text); resize: vertical; line-height: 1.7;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+textarea:focus {
+  outline: none; border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(192,98,42,.12);
+}
+.why-label { font-size: 12px; font-weight: 700; color: var(--why-color); margin: 11px 0 6px; }
+.why-ta { min-height: 58px; font-size: 13px; background: #fff8f2; }
+
+/* ── FEEDBACK ── */
+.feedback-box {
+  display: none; border-radius: var(--radius-sm);
+  padding: 13px 15px; margin-top: 13px;
+  animation: rise 0.2s ease;
+  border: 1px solid var(--border);
+}
+.feedback-box.show { display: block; }
+.feedback-box.good { background: var(--sage-light); border-color: #b8d8b8; }
+.feedback-box.step { background: var(--gold-light);  border-color: #e8c878; }
+
+.fb-head { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.fb-head.good { color: var(--sage-dark); }
+.fb-head.step { color: var(--gold-dark); }
+
+.fb-body { font-size: 13px; color: var(--text2); line-height: 1.65; }
+.fb-ex {
+  font-size: 13px;
+  background: #fff8f2; color: var(--primary-hover);
+  border-radius: var(--radius-sm);
+  padding: 10px 13px; margin-top: 10px; line-height: 1.7;
+  border-left: 3px solid var(--apricot);
+  font-style: italic;
+}
+.fb-ex-label { font-size: 11px; font-weight: 700; color: var(--apricot); letter-spacing:.04em; display:block; margin-bottom:4px; font-style:normal; }
+
+/* ── SUMMARY ── */
+.summary-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.4rem;
+  animation: rise 0.22s ease;
+  box-shadow: 0 2px 12px rgba(160,80,40,0.07);
+}
+.summary-ttl { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 1rem; }
+.s-item { padding: 10px 0; border-bottom: 1px dashed rgba(180,110,70,0.2); }
+.s-item:last-of-type { border-bottom: none; }
+.s-q { font-size: 11px; font-weight: 700; color: var(--text3); margin-bottom: 4px; letter-spacing:.03em; }
+.s-a { font-size: 13px; color: var(--text); line-height: 1.6; }
+.s-w { font-size: 12px; color: var(--why-color); margin-top: 5px; line-height: 1.55; background: var(--primary-light); padding: 5px 9px; border-radius: 6px; }
+.s-w::before { content: '理由 → '; font-weight: 700; }
+.summary-footer {
+  font-size: 12px; color: var(--text2); line-height: 1.75;
+  margin-top: 1rem; padding-top: 1rem;
+  border-top: 1px dashed rgba(180,110,70,0.2);
+}
+
+/* ── COMPLETION ── */
+.completion { text-align: center; padding: 2.5rem 1rem; }
+.comp-icon { font-size: 40px; margin-bottom: 12px; }
+.comp-ttl { font-size: 22px; font-weight: 700; color: var(--primary); margin-bottom: 10px; }
+.comp-msg { font-size: 14px; color: var(--text2); line-height: 1.8; }
+
+/* ── BUTTONS ── */
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
+button {
+  cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600;
+  border-radius: var(--radius-sm); padding: 9px 18px;
+  border: 1.5px solid var(--border2);
+  background: var(--bg-card); color: var(--text2);
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
+}
+button:hover { background: var(--bg2); border-color: var(--apricot); color: var(--text); }
+button:active { transform: scale(0.98); }
+
+.btn-p {
+  background: var(--primary); color: #fff8f2;
+  border-color: var(--primary);
+}
+.btn-p:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: #fff8f2; }
+
+.btn-g { color: var(--sage-dark); border-color: #c0dac0; }
+.btn-g:hover { background: var(--sage-light); border-color: var(--sage); color: var(--sage-dark); }
+
+.reset-btn {
+  font-size: 12px; color: var(--text3); background: rgba(255,255,255,0.7);
+  border: 1px solid var(--border2); border-radius: var(--radius-sm);
+  padding: 5px 12px; cursor: pointer; font-family: inherit; font-weight: 500;
+}
+.reset-btn:hover { background: var(--bg2); color: var(--text2); }
+
+/* ── DESC STEPS ── */
+.desc-intro {
+  font-size: 13px; color: var(--text2); line-height: 1.7;
+  background: var(--lavender-light); border-left: 3px solid var(--lavender);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 10px 13px; margin-bottom: 16px;
+}
+.desc-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px; }
+.desc-step { background: var(--bg-card); border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.desc-step-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 13px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.desc-badge {
+  font-size: 12px; font-weight: 800; min-width: 28px; height: 28px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.badge-D { background: #fbe8d8; color: #a84f20; }
+.badge-E { background: var(--lavender-light); color: var(--lavender-dark); }
+.badge-S { background: var(--sage-light); color: var(--sage-dark); }
+.badge-C { background: var(--gold-light); color: var(--gold-dark); }
+.desc-step-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.desc-step-sub   { font-size: 11px; color: var(--text3); margin-top: 1px; line-height: 1.4; }
+.desc-step textarea {
+  border: none; border-radius: 0; background: #fffcf9;
+  min-height: 68px; font-size: 13px; padding: 9px 13px;
+  box-shadow: none;
+}
+.desc-step textarea:focus { border-color: transparent; box-shadow: inset 0 0 0 2px rgba(192,98,42,.15); }
+
+.desc-fb-wrap { margin-top: 14px; }
+.desc-fb-item { margin-bottom: 10px; border-radius: var(--radius-sm); padding: 10px 13px; }
+.desc-fb-item.good { background: var(--sage-light); border: 1px solid #b8d8b8; }
+.desc-fb-item.step { background: var(--gold-light);  border: 1px solid #e8c878; }
+.desc-fb-letter { font-size: 11px; font-weight: 800; margin-bottom: 4px; }
+.desc-fb-letter.D { color: #a84f20; }
+.desc-fb-letter.E { color: var(--lavender-dark); }
+.desc-fb-letter.S { color: var(--sage-dark); }
+.desc-fb-letter.C { color: var(--gold-dark); }
+.desc-fb-text { font-size: 12px; color: var(--text2); line-height: 1.6; }
+.desc-ex-block {
+  margin-top: 14px; padding: 13px 14px;
+  background: #fff8f2; border-left: 3px solid var(--apricot);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.desc-ex-title { font-size: 11px; font-weight: 700; color: var(--apricot); letter-spacing: .05em; margin-bottom: 8px; }
+.desc-ex-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+.desc-ex-row:last-child { margin-bottom: 0; }
+.desc-ex-lbl { font-size: 11px; font-weight: 800; min-width: 18px; margin-top: 2px; }
+.desc-ex-lbl.D { color: #a84f20; }
+.desc-ex-lbl.E { color: var(--lavender-dark); }
+.desc-ex-lbl.S { color: var(--sage-dark); }
+.desc-ex-lbl.C { color: var(--gold-dark); }
+.desc-ex-txt { font-size: 12px; color: var(--primary-hover); line-height: 1.65; font-style: italic; }
+
+/* ── COPY BLOCK ── */
+.copy-block {
+  margin-top: 14px;
+  background: linear-gradient(135deg, #fff8f0 0%, #fef3e8 100%);
+  border: 1.5px dashed var(--apricot);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.copy-label {
+  font-size: 11px; font-weight: 700; color: var(--primary);
+  letter-spacing: .05em; margin-bottom: 5px;
+  display: flex; align-items: center; gap: 6px;
+}
+.copy-desc { font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 10px; }
+.copy-dest { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-copy {
+  font-size: 12px; font-weight: 700; padding: 8px 15px;
+  border-radius: var(--radius-sm); cursor: pointer; font-family: inherit;
+  transition: all 0.15s; border: 1.5px solid;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-copy-chatgpt { background: #10a37f; color: #fff; border-color: #10a37f; }
+.btn-copy-chatgpt:hover { background: #0d8f6e; border-color: #0d8f6e; }
+.btn-copy-plain { background: var(--bg-card); color: var(--primary); border-color: var(--apricot); }
+.btn-copy-plain:hover { background: var(--apricot-light); }
+.btn-copy.copied { background: var(--sage-light) !important; color: var(--sage-dark) !important; border-color: var(--sage) !important; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(16px);
+  background: #3d2b1f; color: #fff8f0;
+  font-size: 13px; font-weight: 600; font-family: inherit;
+  padding: 10px 22px; border-radius: 30px;
+  opacity: 0; transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none; white-space: nowrap; z-index: 999;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="wrap">
+  <div class="app-header">
+    <div class="app-title">アサーション自己練習</div>
+    <div class="app-tagline">自分を知ることから、気持ちを伝えることへ</div>
+  </div>
+  <div class="top-bar">
+    <div id="levelPill" class="level-pill pill-self">レベル 1</div>
+    <div class="level-dots" id="levelDots"></div>
+    <button class="reset-btn" onclick="resetAll()">リセット</button>
+  </div>
+  <div id="mainArea"></div>
+</div>
+
+<script>
+// ===== DATA =====
+const L1_QS = [
+  { q:'何をしていると癒される？', hint: null },
+  { q:'どんなことが嬉しい？', hint: null },
+  { q:'何をしている時が楽しい？', hint: null },
+  { q:'宝物は何？', hint: null },
+  { q:'あなたにとって大切な人は？', hint: null },
+  { q:'どんなことをされると許せない？', hint:'「許せない」という感覚は、自分の大切な価値観や境界線を教えてくれるサインです。' },
+  { q:'どんなことが悲しい？', hint: null },
+  { q:'どんなことが恥ずかしい？', hint:'恥ずかしさの裏には、自分が大事にしていることが隠れています。' },
+  { q:'どんな人が苦手？', hint: null },
+  { q:'どんな人とは距離を取ろうと思う？', hint:'「距離を取る」という判断は自己防衛の大切なスキルです。苦手と距離を置くは違います。' },
+];
+
+const LEVELS = [
+  { name:'レベル 1', desc:'自分を知る', badge:'自己理解', pill:'pill-self', diff:'easy', type:'self' },
+  { name:'レベル 2', desc:'近況・感情を短く伝える', badge:'初級', pill:'pill-easy', diff:'easy', type:'scenario',
+    cats:['medical','friend'],
+    tips:['「最近〇〇でした」と事実を一文で伝えてみましょう','完璧に話そうとしなくてOK','感情を一言添えると伝わりやすくなります'],
+    ex:'「先生、先週は少し落ち込む日が続きましたが、後半は安定してきました。睡眠がまだ浅いのが気になっています。」' },
+  { name:'レベル 3', desc:'希望・お願いを伝える', badge:'初級', pill:'pill-easy', diff:'easy', type:'scenario',
+    cats:['home','medical'],
+    tips:['「〜してほしい」「〜をお願いできますか」と具体的に','まず感謝から入ると伝えやすい','遠慮しすぎず、でも押しつけにならないように'],
+    ex:'「いつもありがとうございます。家事を少し分担していただくことはできますか？私だけでは少し負荷が高くて。」' },
+  { name:'レベル 4', desc:'誘いを丁寧に断る', badge:'初級', pill:'pill-easy', diff:'easy', type:'scenario',
+    cats:['friend','service'],
+    tips:['「ありがとう、でも今は…」の形が使いやすい','理由は詳しく言わなくてOK','断ることは相手を傷つけることではありません'],
+    ex:'「誘ってくれてありがとう。今はまだ大勢の場が少し疲れるので、今回は遠慮させてください。また落ち着いたら連絡するね。」' },
+  { name:'レベル 5', desc:'自分の意見を穏やかに述べる', badge:'中級', pill:'pill-medium', diff:'medium', type:'scenario',
+    cats:['work','home','friend'],
+    tips:['「私は〜と思います」で自分の考えを表現','相手を批判せず、自分の視点を伝える','「〜という点でどうでしょう」と提案形にすると柔らかい'],
+    ex:'「私はそう考えています。あなたの見方もあると思うので、一緒に確認しませんか？」' },
+  { name:'レベル 6', desc:'締め切りや条件の交渉', badge:'中級', pill:'pill-medium', diff:'medium', type:'scenario',
+    cats:['work','medical'],
+    tips:['数字や期限を具体的に伝えると交渉しやすい','「〜は難しいですが、〜ならできます」と代替案を提示','断るためでなく、解決策を探すための会話'],
+    ex:'「今の体調では今週末の締め切りが難しそうで、来週水曜日まで延ばしていただくことは可能でしょうか。」' },
+  { name:'レベル 7', desc:'複数の気持ちを整理して伝える', badge:'中級', pill:'pill-medium', diff:'medium', type:'scenario',
+    cats:['home','friend'],
+    tips:['まず感謝や共感を一言、それから「でも」で自分の気持ち','「傷ついた」という気持ちも正直に伝えていい','一度に全部言わなくてOK'],
+    ex:'「そう言われると正直つらいです。私も早く戻りたいと思っていて、今は主治医と相談しながら進めています。」' },
+  { name:'レベル 8', desc:'プレッシャーや批判に対応する', badge:'上級', pill:'pill-hard', diff:'hard', type:'scenario',
+    cats:['home','work'],
+    tips:['深呼吸してから返答するイメージで','「おっしゃることはわかりますが…」と受け止めてから','感情的になりそうなら「少し考えさせてください」もOK'],
+    ex:'「おっしゃっていることはわかります。ただ、今は私にとっては難しい時期なので、少し時間をいただけますか。」' },
+  { name:'レベル 9', desc:'自分の限界を明確に伝える', badge:'上級', pill:'pill-hard', diff:'hard', type:'scenario',
+    cats:['work','home','friend'],
+    tips:['「今の私には…が限界です」と率直に','限界を伝えることは弱さではなく自己保護','NOはひとつの完全な文章です。言い訳は必要ない'],
+    ex:'「今の私にできる範囲はここまでです。それ以上は正直難しいです。ご理解いただけると助かります。」' },
+  { name:'レベル 10', desc:'激しい感情的反応に落ち着いて対応', badge:'上級', pill:'pill-hard', diff:'hard', type:'scenario',
+    cats:['work'],
+    tips:['相手の感情と自分の行動は分けて考える','「ミスは認めます。でも…」と事実と感情を分ける','「冷静に話し合いたい」と伝えること自体がアサーション'],
+    ex:'「ご指摘の通りで申し訳ありませんでした。ただ、このような形での叱責は冷静な話し合いが難しくなります。後ほど別の場でお話しできますか。」' },
+  { name:'レベル 11', desc:'DESC法で整理して伝える', badge:'DESC', pill:'pill-desc', diff:'hard', type:'desc' },
+];
+
+const SCENARIOS = {
+  work:{ label:'職場', items:[
+    { t:'上司からの急な残業依頼',
+      d:'退勤直前に上司から「今日残業できる？」と聞かれました。今日は外せない用事があります。',
+      p:'断ることが難しいと感じながらも、自分の予定を伝える必要があります。',
+      good_fb:'予定を伝えながら、代替案も示せています。断ることへの罪悪感を持たなくて大丈夫です。',
+      imp_fb:'「できません」だけでなく、理由を一言添えると伝わりやすくなります。「今日は外せない用事があるため、難しいです」のように具体的に。',
+      ex:'「今日は外せない用事があり、残業が難しい状況です。明日の朝早めに来ることはできますが、いかがでしょうか。」' },
+    { t:'締め切りの延長依頼',
+      d:'プロジェクトの締め切りが迫っていますが、体調不良でペースが落ちています。上司に相談します。',
+      p:'「少し締め切りを延ばしていただくことは可能でしょうか」と伝えたい。',
+      good_fb:'状況を正直に伝え、具体的な代替案も出せています。これがアサーティブな交渉の形です。',
+      imp_fb:'「難しいです」で終わらず、「いつまでなら対応できるか」を具体的に伝えましょう。相手も調整しやすくなります。',
+      ex:'「体調が優れず、今週末の締め切りが厳しい状況です。来週水曜日まで延ばしていただくことは可能でしょうか。」' },
+    { t:'同僚の非協力的な態度',
+      d:'チームの仕事を何度かお願いしたが、同僚がいつも「忙しい」と断ります。',
+      p:'相手の状況も理解しつつ、チームとして協力してほしいと伝えたい。',
+      good_fb:'相手を責めず、チームとしての視点で伝えられています。Iメッセージが使えています。',
+      imp_fb:'「いつも断る」と責めるのではなく、「私は困っている」という自分の状況を中心に伝えましょう。',
+      ex:'「お忙しいのはわかるのですが、この作業は一人では難しくて。少しだけ手を貸していただけると助かります。」' },
+    { t:'声を荒げてミスを指摘する上司',
+      d:'小さなミスをしてしまい、上司が感情的になって大声で叱責してきます。他の同僚も見ています。',
+      p:'「ミスは申し訳ありません。ただ、このような形での指摘は…」と冷静に対応したい。',
+      good_fb:'ミスを認めつつ、叱責の仕方についても自分の気持ちを伝えられています。冷静に対応できています。',
+      imp_fb:'まずミスへの謝罪を明確にしてから、指摘の仕方への気持ちを伝えましょう。順序が大切です。',
+      ex:'「ご指摘はもっともです。申し訳ありませんでした。ただ、このような場での指摘は私には少し辛く、後ほど個別にお話しいただけますか。」' },
+  ]},
+  home:{ label:'家庭', items:[
+    { t:'パートナーへの希望を伝える',
+      d:'家事の分担について、もう少し助けてほしいと思っています。',
+      p:'責めることなく、自分の気持ちと希望をパートナーに伝えたい。',
+      good_fb:'責めずに「私は〜と感じる」という形で伝えられています。希望も具体的に伝えられています。',
+      imp_fb:'「あなたがやらない」ではなく「私がしんどい」という視点で伝えましょう。具体的に何をお願いしたいかも添えると伝わりやすいです。',
+      ex:'「最近、家事を一人でこなすのが少しきつくなってきました。食器洗いか洗濯のどちらかを担当してもらえると、とても助かります。」' },
+    { t:'親からの干渉',
+      d:'親が仕事復帰について「もっと早く戻るべき」とプレッシャーをかけてきます。',
+      p:'自分のペースを守りながら、親の心配も受け止めて返答したい。',
+      good_fb:'親の心配を受け止めながら、自分のペースも伝えられています。バランスの取れた返答です。',
+      imp_fb:'親の心配を頭ごなしに否定せず、まず「心配してくれてありがとう」と受け取ってから自分の状況を説明しましょう。',
+      ex:'「心配してくれてありがとう。私も早く戻りたいと思っているよ。今は主治医と相談しながら、自分のペースで進めているから、もう少し見守っていてほしいな。」' },
+    { t:'家族からの心ない言葉',
+      d:'家族から「いつまでも休んでいられない」と言われました。傷つきましたが、対話を続けたい。',
+      p:'「その言葉は少し傷つきました。私は今…」と自分の感情を伝えたい。',
+      good_fb:'傷ついた気持ちを正直に伝えながら、攻撃せずに対話しようとしています。これがアサーションの核心です。',
+      imp_fb:'「傷ついた」という気持ちを伝えることが最初のステップです。黙って我慢したり、言い返したりしない第三の道を選びましょう。',
+      ex:'「その言葉は少し傷つきました。私なりに早く戻ろうと努力しているので、もう少し信じてもらえると嬉しいです。」' },
+    { t:'家族への近況報告',
+      d:'しばらく連絡が取れていなかった家族に、最近の様子を伝えます。',
+      p:'「最近こんなことがあって…」と自分のペースで話し始めます。',
+      good_fb:'自分のペースで近況を伝えられています。短くても自己開示できていることが大切です。',
+      imp_fb:'すべてを話そうとしなくてOKです。「最近こんなことがあった」と一つだけ具体的なエピソードを選んで話してみましょう。',
+      ex:'「久しぶり。最近は少しずつリワークに通えるようになってきたよ。まだ本調子じゃないけど、前より安定してきた感じがしている。」' },
+  ]},
+  friend:{ label:'友人関係', items:[
+    { t:'集まりの断り方',
+      d:'友人からの飲み会に誘われましたが、まだ大勢の場が疲れます。',
+      p:'相手への感謝を伝えながら、正直に今の状態を説明して断りたい。',
+      good_fb:'感謝を伝えてから断る形が自然にできています。正直に今の状態を説明できていてよかったです。',
+      imp_fb:'まず「誘ってくれてありがとう」と感謝を伝えることが大切です。理由は詳しく話さなくてもOKで、「今は少し難しい」で十分です。',
+      ex:'「誘ってくれてありがとう！今はまだ大勢の場が少し疲れる時期で、今回は遠慮させて。落ち着いたら絶対連絡するね。」' },
+    { t:'無理な頼みごと',
+      d:'友人から「引っ越しを手伝って」と頼まれましたが、体力的に難しい状況です。',
+      p:'友情を大切にしながらも、正直に断る言葉を見つけたい。',
+      good_fb:'友情を大切にしながら、自分の状況も正直に伝えられています。代替案を提示できていてよかったです。',
+      imp_fb:'「無理」とだけ言わず、今の自分の状態を一言添えると相手も理解しやすくなります。できる範囲での別のサポートを提案するのもよいでしょう。',
+      ex:'「ごめん、今は体力的にちょっと難しくて。引っ越しの荷造りリストを一緒に考えるくらいなら手伝えるけど、どうかな？」' },
+    { t:'友人の誤解を解く',
+      d:'友人が自分のことを誤解していて、それが広まっているようです。',
+      p:'感情的にならずに、事実を丁寧に伝えて誤解を解きたい。',
+      good_fb:'感情的にならず、事実ベースで丁寧に伝えられています。相手を責めずに話せています。',
+      imp_fb:'まず「そんなこと言ってない！」と反論したくなる気持ちを一度置いて、「実際にはこうだった」と事実だけ伝えることに集中しましょう。',
+      ex:'「ちょっと確認したいんだけど、〇〇って話が広まってるみたいで。実際に私が言ったのは△△で、少し伝わり方が違ってたみたい。直接話せてよかった。」' },
+    { t:'久しぶりの友人への挨拶',
+      d:'休職中に疎遠になっていた友人と久しぶりに会います。',
+      p:'「久しぶり！最近どうしてた？」と自然に話せるようになりたい。',
+      good_fb:'自然な挨拶ができています。「久しぶり」の一言が出るだけで十分な自己表現です。',
+      imp_fb:'完璧に話そうとしなくてOKです。「久しぶり、元気だった？」の一言から始めるだけで十分です。沈黙があっても大丈夫。',
+      ex:'「久しぶり！会えてよかった。しばらく色々あってなかなか連絡できなかったけど、また会えて嬉しいな。」' },
+  ]},
+  medical:{ label:'医療・支援', items:[
+    { t:'主治医への症状報告',
+      d:'診察で「調子はどうですか？」と聞かれました。正直に伝えたい。',
+      p:'「先週は…な状態でした。特に…の点が気になっています」と具体的に伝えたい。',
+      good_fb:'良かった点も辛かった点も具体的に伝えられています。「気になっている」と自分から問題提起できているのもよいです。',
+      imp_fb:'「まあまあです」で終わらず、良かった日と辛かった日を分けて伝えましょう。「特に〇〇が気になっています」と一つ具体的に伝えると診察が深まります。',
+      ex:'「先週は前半が少し落ち込みやすかったですが、後半は安定してきました。睡眠がまだ浅くて、それが一番気になっています。」' },
+    { t:'産業医・保健師への復職相談',
+      d:'リワークを終え、復職に向けた面談を産業医・保健師と行います。職場に戻ることへの不安を正直に伝えたい。',
+      p:'「実は…のことが不安で。復職に向けてどうしたらよいでしょうか」と相談したい。',
+      good_fb:'不安を具体的に言葉にして相談できています。「どうしたらよいか」と聞けていることも大切な自己表現です。',
+      imp_fb:'「不安です」とだけ言うより、「何が」不安なのかを一つ具体的にするとアドバイスをもらいやすくなります。職場環境・体調・人間関係など、気になる点を一つ選んで伝えてみましょう。',
+      ex:'「リワークは終えましたが、実際に職場に戻ったらまた体調が崩れるんじゃないかという不安があります。復職前に準備しておけることがあれば、一緒に考えていただけますか。」' },
+    { t:'合理的配慮の依頼',
+      d:'復職後の職場環境について、合理的配慮をお願いする必要があります。',
+      p:'「復職にあたって、…の配慮をいただくことは可能でしょうか」と伝えたい。',
+      good_fb:'具体的にどんな配慮が必要かを伝えられています。理由も添えることで相手も動きやすくなります。',
+      imp_fb:'「配慮してほしい」という漠然とした伝え方より、「具体的に何を、なぜ」お願いしたいのかを整理して伝えましょう。',
+      ex:'「復職にあたって、最初の1ヶ月は残業なしで定時退社させていただけますか。体力を戻しながら仕事に慣れていきたいと思っています。」' },
+  ]},
+  service:{ label:'日常', items:[
+    { t:'飲食店での注文変更',
+      d:'注文が間違って届きました。店員さんに伝えます。',
+      p:'穏やかに「すみません、こちら注文と違うようなのですが…」と伝えたい。',
+      good_fb:'穏やかに、でも明確に伝えられています。相手を責めず事実だけ伝えるのがポイントです。',
+      imp_fb:'謝らなくて大丈夫です。「すみません」と呼びかけてから、「注文と違うものが届いた」という事実をシンプルに伝えましょう。',
+      ex:'「すみません、こちら〇〇を注文したのですが、△△が届いているようで。確認していただけますか。」' },
+    { t:'不当な扱いへの対応',
+      d:'窓口で横柄な態度を取られています。ただ用件を済ませたい。',
+      p:'相手に対抗せず、でも自分の権利を守りながら用件を伝えたい。',
+      good_fb:'感情的にならず、用件に集中して対応できています。自分のペースを保てていることが大切です。',
+      imp_fb:'相手の態度に巻き込まれず、「私は〇〇を確認したい」と用件だけに集中しましょう。反論より目的の達成を優先するのがアサーティブな対応です。',
+      ex:'「〇〇の手続きについて確認させてください。（相手の態度には触れず）必要な書類はこちらで合っていますか？」' },
+  ]},
+};
+
+// ===== DESC SCENARIOS =====
+const DESC_SCENES = [
+  {
+    cat: '職場', title: '同僚からの深夜の電話',
+    situation: '同僚が夜遅くに電話をかけてきました。職場で大失敗をして上司に叱られ、愚痴を聞いてほしいとのことです。しかしあなたは昨日も深夜まで残業し、今日も疲弊しきっています。',
+    goal: '相手の気持ちに共感しながらも、今夜は電話を切り、代替案を提案したい。',
+    hints: {
+      D: '昨日・今日の具体的な状況（残業時間、忙しさ）を客観的な事実として伝えます。主観や感情は入れません。',
+      E: '相手の辛さへの共感を一言添えつつ、自分が今とても疲れていることを「私は…」で伝えます。',
+      S: '今夜の電話を丁重に断る提案を、具体的かつ相手が受け入れやすい形で述べます。',
+      C: '相手が断った場合の代替案（別の日時など）を具体的に伝えます。'
+    },
+    ex: {
+      D: '実は昨日21時すぎまで残業していて、寝たのが1時過ぎだったんです。今日もお昼も取れないくらい忙しくて。',
+      E: 'あなたに辛いことがあったのは伝わっています。でも私、今日本当に疲れ果てていて。',
+      S: '申し訳ないけど、今夜はここで電話を切らせてもらえますか？',
+      C: '明日の夕方18時以降なら、ゆっくり話を聞けると思うけど、どうかな？'
+    }
+  },
+  {
+    cat: '家庭', title: 'パートナーへの家事分担の相談',
+    situation: '家事をほぼ一人でこなしている状態が続いています。パートナーは仕事が忙しく気づいていない様子ですが、あなたは限界に近づいています。',
+    goal: '責めずに状況を伝え、具体的な分担を提案し、難しければ代替案も示したい。',
+    hints: {
+      D: '具体的にどんな家事をどれくらいこなしているかを、数字や頻度を使って客観的に伝えます。',
+      E: '「私は…」を使って、疲れや限界に近い気持ちを率直に伝えます。責める言葉にならないように。',
+      S: '具体的に何をお願いしたいか（例：ゴミ出し・食器洗い）を明確に提案します。',
+      C: 'もしそれが難しければ、家事代行など別の解決策を提案します。'
+    },
+    ex: {
+      D: '最近、平日の夕食・洗濯・掃除・子どもの送迎を毎日一人でやっています。',
+      E: '私、正直かなりしんどくなってきていて、このまま続けるのが難しくなってきました。',
+      S: 'ゴミ出しと週末の洗濯だけでも担当してもらえると、すごく助かるんだけど、どうかな？',
+      C: 'もし難しいなら、週1回だけ家事代行を頼むことも考えているんだけど、一緒に考えてほしい。'
+    }
+  },
+  {
+    cat: '職場', title: '上司への業務量の相談',
+    situation: '復職して間もない時期に、想定以上の仕事量を割り当てられています。体調を保ちながら続けるのが難しくなってきました。',
+    goal: '状況を正直に伝え、業務量の調整を提案したい。',
+    hints: {
+      D: '現在の業務量と自分の状況を、感情を混ぜずに事実として伝えます。',
+      E: '体調への影響や、このまま続けることへの不安を「私は…」で伝えます。',
+      S: '具体的な業務量の調整案（減らしてほしい業務など）を提案します。',
+      C: '提案が難しければ、別の解決策（優先順位づけなど）を代替案として伝えます。'
+    },
+    ex: {
+      D: '現在、復職から3週間で、毎日定時を1時間以上超えて作業している状況が続いています。',
+      E: '私、このペースが続くと体調が崩れそうで、正直不安を感じています。',
+      S: 'まず最初の1ヶ月は、優先度の高い業務に絞って担当させていただけないでしょうか。',
+      C: 'もし業務量の変更が難しいようであれば、タスクの優先順位を一緒に確認させていただけますか。'
+    }
+  },
+  {
+    cat: '友人関係', title: '無理な頼みへの断り',
+    situation: '友人から「週末に引っ越しを手伝って」と頼まれました。しかし体力的・体調的に重労働は難しい状態です。',
+    goal: '友情を大切にしながら、正直な状況を伝え、できる範囲での代替案を示したい。',
+    hints: {
+      D: '自分の今の体力・体調の状態を、具体的な事実として伝えます（「最近疲れやすくて」など）。',
+      E: '申し訳ない気持ちと、友人を助けたい気持ちを正直に「私は…」で伝えます。',
+      S: '当日の引っ越し作業への参加が難しいことを明確に伝え、代わりにできることを提案します。',
+      C: '別の形でのサポート（荷造りの手伝い・当日の差し入れなど）を代替案として示します。'
+    },
+    ex: {
+      D: '最近、体調が完全に戻っていなくて、重いものを運ぶのが今の私には難しい状態なんです。',
+      E: '助けたい気持ちは本当にあるんだけど、正直に言わないといけなくて、申し訳ない気持ちです。',
+      S: 'ごめんね、当日の引っ越し作業はちょっと難しいんだ。',
+      C: '荷造りの計画を一緒に考えたり、当日に差し入れを持っていくことならできるよ。どうかな？'
+    }
+  },
+  {
+    cat: '医療・支援', title: '主治医への治療方針の相談',
+    situation: '主治医から提案されている薬の量について、副作用が気になっており、減薬できないか相談したいと思っています。',
+    goal: '医師を信頼しながらも、自分の希望や不安を率直に伝え、一緒に検討してほしいと伝えたい。',
+    hints: {
+      D: '副作用として感じている具体的な症状と、それが生活に与えている影響を客観的に伝えます。',
+      E: '薬についての不安や、減薬したいという希望を「私は…」の形で正直に伝えます。',
+      S: '減薬の可能性や、段階的な調整について具体的に相談を提案します。',
+      C: '先生の判断を尊重しながら、別の選択肢（経過観察など）も一緒に考えてほしいと伝えます。'
+    },
+    ex: {
+      D: '今の薬を飲み始めてから、日中に強い眠気が出ていて、リワークの集中力に影響が出ています。',
+      E: '私、このまま続けることに少し不安があって、先生に相談したいと思っていました。',
+      S: '少し量を減らすことは、医学的に可能でしょうか？ご意見をお聞きしたいのですが。',
+      C: 'もし今は減薬が難しいようであれば、どういう状態になれば相談できるか、目安を教えていただけますか。'
+    }
+  }
+];
+
+const FB_GOOD_GENERIC = ['自分の気持ちを正直に言葉にできています。','Iメッセージが自然に使えています。','相手を尊重しながら、自分の気持ちも伝えられています。'];
+function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+// ===== STATE =====
+let S = {
+  level: 0,
+  l1q: 0,
+  l1ans: Array(10).fill(''),
+  l1why: Array(10).fill(''),
+  scenes: [],
+  si: 0,
+  fbShown: false,
+  descSi: 0,
+  descShuffled: [],
+};
+
+function shuf(a){ const b=[...a]; for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];} return b; }
+function getScenes(lvl){ let a=[]; LEVELS[lvl].cats.forEach(c=>SCENARIOS[c].items.forEach(s=>a.push({...s,cat:SCENARIOS[c].label}))); return shuf(a); }
+
+// ===== RENDER =====
+function render(){
+  renderDots();
+  const lv = LEVELS[S.level];
+  const pill = document.getElementById('levelPill');
+  pill.className = 'level-pill '+lv.pill;
+  pill.textContent = lv.name+' — '+lv.desc;
+  if(lv.type==='self') renderL1();
+  else if(lv.type==='desc') renderDesc();
+  else renderScene();
+}
+
+function renderDots(){
+  const el = document.getElementById('levelDots');
+  el.innerHTML='';
+  for(let i=0;i<11;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i<S.level?' done':i===S.level?' active':'');
+    d.title=LEVELS[i].name;
+    d.onclick=()=>goLevel(i);
+    el.appendChild(d);
+  }
+}
+
+// ---- L1 ----
+function renderL1(){
+  const qi=S.l1q, qd=L1_QS[qi], total=L1_QS.length;
+  let dots='<div class="l1-dots">';
+  for(let i=0;i<total;i++){
+    const filled=S.l1ans[i].trim().length>0;
+    const cur=i===qi;
+    dots+=`<div class="l1-dot${cur?' current':filled?' filled':''}" onclick="gotoL1(${i})"></div>`;
+  }
+  dots+='</div>';
+
+  const hintHtml = qd.hint ? `<div class="hint">${qd.hint}</div>` : '';
+
+  const card=`<div class="card">
+    <div class="card-label"><span>自己理解ワーク</span><span>${qi+1} / ${total}</span></div>
+    <div class="card-q">${qd.q}</div>
+    <div class="card-sub">→ なぜそうなのか、理由も考えてみよう</div>
+    ${hintHtml}
+    <textarea id="l1a" placeholder="思いつくままに書いてみましょう…" oninput="saveL1()">${S.l1ans[qi]}</textarea>
+    <div class="why-label">なぜそう感じるのか</div>
+    <textarea class="why-ta" id="l1w" placeholder="理由を書いてみましょう…" oninput="saveL1W()">${S.l1why[qi]}</textarea>
+  </div>`;
+
+  let btns='<div class="btn-row">';
+  if(qi>0) btns+=`<button onclick="prevL1()">← 前へ</button>`;
+  if(qi<total-1) btns+=`<button class="btn-p" onclick="nextL1()">次の質問へ →</button>`;
+  else           btns+=`<button class="btn-p" onclick="finishL1()">ふりかえりを見る →</button>`;
+  btns+='</div>';
+
+  document.getElementById('mainArea').innerHTML = dots+card+btns;
+}
+
+function saveL1(){ S.l1ans[S.l1q]=document.getElementById('l1a').value; }
+function saveL1W(){ S.l1why[S.l1q]=document.getElementById('l1w').value; }
+function nextL1(){ saveL1();saveL1W(); S.l1q=Math.min(S.l1q+1,L1_QS.length-1); render(); }
+function prevL1(){ saveL1();saveL1W(); S.l1q=Math.max(S.l1q-1,0); render(); }
+function gotoL1(i){ saveL1();saveL1W(); S.l1q=i; render(); }
+
+function finishL1(){
+  saveL1();saveL1W();
+  let html='<div class="summary-card"><div class="summary-ttl">あなたの自己理解まとめ</div>';
+  let any=false;
+  L1_QS.forEach((q,i)=>{
+    if(S.l1ans[i].trim()){
+      any=true;
+      html+=`<div class="s-item"><div class="s-q">${q.q}</div><div class="s-a">${S.l1ans[i].replace(/\n/g,'<br>')}</div>`;
+      if(S.l1why[i].trim()) html+=`<div class="s-w">${S.l1why[i].replace(/\n/g,'<br>')}</div>`;
+      html+='</div>';
+    }
+  });
+  if(!any) html+='<div style="font-size:13px;color:var(--text2);padding:8px 0;">まだ記入がありません。戻って書いてみましょう。</div>';
+  html+=`<div class="summary-footer">ここに書いたことがアサーションの土台になります。「大切にしていること」「嫌なこと」を知っていると、自分の気持ちを言葉にしやすくなります。</div>`;
+  html+=`<div class="btn-row"><button class="btn-p" onclick="goLevel(1)">レベル 2 へ進む →</button><button onclick="render()">← 質問に戻る</button></div>`;
+  html+='</div>';
+  document.getElementById('mainArea').innerHTML=html;
+}
+
+// ---- SCENARIO ----
+function renderScene(){
+  const lv=LEVELS[S.level];
+  if(!S.scenes.length){ S.scenes=getScenes(S.level); S.si=0; }
+  const sc=S.scenes[S.si%S.scenes.length];
+  S.fbShown=false;
+
+  const card=`<div class="card">
+    <div class="card-label">
+      <span class="cat-tag">${sc.cat}</span>
+      <span class="badge-tag">${lv.badge}</span>
+    </div>
+    <div class="card-q">${sc.t}</div>
+    <div class="card-detail">${sc.d}</div>
+    <div class="card-prompt">${sc.p}</div>
+    <div class="tips-box"><div class="tips-title">練習のポイント</div>${lv.tips.map(t=>`<div class="tip">${t}</div>`).join('')}</div>
+    <div class="copy-block">
+      <div class="copy-label">ChatGPT でロールプレイ練習</div>
+      <div class="copy-desc">下のボタンでプロンプトをコピーして、ChatGPT に貼り付けるとロールプレイ練習ができます。</div>
+      <div class="copy-dest">
+        <button class="btn-copy btn-copy-chatgpt" onclick="copyPrompt('chatgpt')" id="btnChatGPT">
+          <span>📋</span> ChatGPT 用にコピー
+        </button>
+        <button class="btn-copy btn-copy-plain" onclick="copyPrompt('plain')" id="btnPlain">
+          <span>📄</span> テキストだけコピー
+        </button>
+      </div>
+    </div>
+    <div style="font-size:13px;font-weight:600;color:var(--text3);margin-bottom:7px;margin-top:14px;letter-spacing:.03em;">あなたならどう答えますか？</div>
+    <textarea id="scAns" placeholder="ここに自分の言葉で書いてみましょう…"></textarea>
+    <div class="feedback-box" id="fbBox">
+      <div class="fb-head" id="fbHead"></div>
+      <div class="fb-body" id="fbBody"></div>
+      <div class="fb-ex" id="fbEx"><span class="fb-ex-label">例文</span><span id="fbExText"></span></div>
+    </div>
+  </div>`;
+
+  document.getElementById('mainArea').innerHTML = card + makeBtns(false);
+}
+
+function makeBtns(fbShown){
+  let b=`<div class="btn-row" id="btnRow">
+    <button class="btn-p" onclick="checkScene()">フィードバックをもらう ↗</button>
+    <button class="btn-g" onclick="shuffleScene()">シャッフル</button>`;
+  if(fbShown){
+    if(S.level<10) b+=`<button onclick="goLevel(S.level+1)">次のレベルへ →</button>`;
+    else           b+=`<button class="btn-p" onclick="showComp()">完了 →</button>`;
+  }
+  if(S.level>0) b+=`<button onclick="goLevel(S.level-1)">← 前のレベルへ</button>`;
+  b+='</div>';
+  return b;
+}
+
+function checkScene(){
+  const ans=(document.getElementById('scAns')||{}).value||'';
+  if(!ans.trim()){ document.getElementById('scAns').focus(); return; }
+  const sc=S.scenes[S.si%S.scenes.length];
+  const score=((/私|わたし|ぼく|僕/.test(ans))?1:0)+(ans.length>25?1:0)+((/思い|感じ|です|ます|嬉し|つら|困|助かり|申し訳|ありがとう|お願い/.test(ans))?1:0);
+  const good=score>=2;
+  const fbBox = document.getElementById('fbBox');
+  fbBox.className = 'feedback-box show ' + (good ? 'good' : 'step');
+  document.getElementById('fbHead').className = 'fb-head ' + (good ? 'good' : 'step');
+  document.getElementById('fbHead').textContent = good ? 'よくできています' : 'さらに一歩';
+  document.getElementById('fbBody').textContent = good
+    ? (sc.good_fb || rnd(FB_GOOD_GENERIC))
+    : (sc.imp_fb  || 'Iメッセージ（「私は〜」）を使いながら、自分の気持ちと希望を具体的に伝えてみましょう。');
+  document.getElementById('fbExText').textContent = sc.ex;
+  S.fbShown=true;
+  const old=document.getElementById('btnRow');
+  if(old){ const tmp=document.createElement('div'); tmp.innerHTML=makeBtns(true); old.replaceWith(tmp.firstChild); }
+}
+
+function copyPrompt(mode){
+  const sc = S.scenes[S.si % S.scenes.length];
+  const lv = LEVELS[S.level];
+
+  const chatgptText =
+`あなたはロールプレイの練習相手です。以下の設定でシナリオを演じてください。
+
+【練習テーマ】${lv.name}：${lv.desc}
+【場面】${sc.cat} ／ ${sc.t}
+【状況説明】${sc.d}
+【私が練習したいこと】${sc.p}
+
+【お願い】
+・あなたは相手役（上司・家族・友人など）として自然に話しかけてください。
+・私がアサーティブに返答したら、相手役として自然に反応してください。
+・1〜2往復やりとりした後、私の返答についてアサーションの観点から短くフィードバックしてください。
+・まず最初に相手役として話しかけるセリフを言ってください。`;
+
+  const plainText =
+`【練習テーマ】${lv.name}：${lv.desc}
+【場面】${sc.cat} ／ ${sc.t}
+【状況】${sc.d}
+【目標】${sc.p}`;
+
+  const text = mode === 'chatgpt' ? chatgptText : plainText;
+  const btnId = mode === 'chatgpt' ? 'btnChatGPT' : 'btnPlain';
+  const label = mode === 'chatgpt' ? '📋 ChatGPT 用にコピー' : '📄 テキストだけコピー';
+  const doneLabel = mode === 'chatgpt' ? '✓ コピーしました！' : '✓ コピーしました！';
+
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById(btnId);
+    if(btn){
+      btn.classList.add('copied');
+      btn.innerHTML = doneLabel;
+      setTimeout(()=>{
+        btn.classList.remove('copied');
+        btn.innerHTML = (mode==='chatgpt' ? '<span>📋</span> ChatGPT 用にコピー' : '<span>📄</span> テキストだけコピー');
+      }, 2200);
+    }
+    showToast(mode==='chatgpt'
+      ? 'コピー完了！ChatGPT に貼り付けてロールプレイ開始 🎭'
+      : 'テキストをコピーしました ✓');
+    if(mode==='chatgpt'){
+      setTimeout(()=>{ window.open('https://chat.openai.com/', '_blank'); }, 400);
+    }
+  }).catch(()=>{
+    showToast('コピーに失敗しました。手動でお試しください。');
+  });
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ---- DESC LEVEL ----
+function renderDesc(){
+  if(!S.descShuffled.length){ S.descShuffled=shuf([...DESC_SCENES]); S.descSi=0; }
+  const sc=S.descShuffled[S.descSi%S.descShuffled.length];
+
+  const steps=[
+    { key:'D', label:'D — describe', sub:'客観的な事実・状況を描写する（主観・感情は入れない）', ph:'誰もが認められる事実を具体的に…', cls:'badge-D' },
+    { key:'E', label:'E — express / empathize', sub:'自分の気持ちを「私は…」で伝える／相手の気持ちへの共感', ph:'私は…と感じています。あなたの…は伝わっています。', cls:'badge-E' },
+    { key:'S', label:'S — specify', sub:'相手が受け入れやすい具体的・現実的な提案をする', ph:'〜していただけますか？〜はどうでしょうか？', cls:'badge-S' },
+    { key:'C', label:'C — choose', sub:'相手が断った場合の代替案・選択肢を示す', ph:'もし難しければ、〜という方法もあります。', cls:'badge-C' },
+  ];
+
+  const stepsHtml=steps.map(s=>`
+    <div class="desc-step">
+      <div class="desc-step-header">
+        <div class="desc-badge ${s.cls}">${s.key}</div>
+        <div><div class="desc-step-title">${s.label}</div><div class="desc-step-sub">${s.sub}</div></div>
+      </div>
+      <textarea id="desc${s.key}" placeholder="${s.ph}"></textarea>
+    </div>`).join('');
+
+  const card=`<div class="card">
+    <div class="card-label">
+      <span class="cat-tag">${sc.cat}</span>
+      <span class="badge-tag">DESC法</span>
+    </div>
+    <div class="card-q">${sc.title}</div>
+    <div class="card-detail">${sc.situation}</div>
+    <div class="card-prompt">${sc.goal}</div>
+    <div class="desc-intro">
+      <strong>DESC法</strong>とは、課題・問題解決に使える表現スキルです。<br>
+      D（描写）→ E（表現・共感）→ S（提案）→ C（代替案）の順に、自分の気持ちと希望を整理して伝えます。<br>
+      各欄にあなたの言葉で書いてみましょう。
+    </div>
+    <div class="desc-steps">${stepsHtml}</div>
+    <div class="feedback-box" id="descFbBox"></div>
+  </div>`;
+
+  const btns=`<div class="btn-row" id="btnRow">
+    <button class="btn-p" onclick="checkDesc()">フィードバックをもらう ↗</button>
+    <button class="btn-g" onclick="shuffleDesc()">シャッフル</button>
+    <button onclick="goLevel(S.level-1)">← 前のレベルへ</button>
+  </div>`;
+
+  document.getElementById('mainArea').innerHTML = card + btns;
+}
+
+function checkDesc(){
+  const vals={ D:(document.getElementById('descD')||{}).value||'', E:(document.getElementById('descE')||{}).value||'', S:(document.getElementById('descS')||{}).value||'', C:(document.getElementById('descC')||{}).value||'' };
+  const allEmpty=Object.values(vals).every(v=>!v.trim());
+  if(allEmpty){ document.getElementById('descD').focus(); return; }
+
+  const sc=S.descShuffled[S.descSi%S.descShuffled.length];
+
+  const checks={
+    D:{ label:'D — 描写', good:'客観的な事実を描写できています。感情を混ぜずに状況を伝えられています。', imp:'「私はこう思う」など主観が混じっていないか確認しましょう。日時・頻度・具体的な状況など、誰もが認められる事実を書きましょう。', ex:sc.ex.D },
+    E:{ label:'E — 表現・共感', good:'「私は…」というIメッセージで気持ちを伝えられています。相手への共感も示せています。', imp:'「あなたのせいで」ではなく「私は…と感じている」という形にしましょう。相手の気持ちへの共感の一言も添えると伝わりやすくなります。', ex:sc.ex.E },
+    S:{ label:'S — 提案', good:'具体的で相手が受け入れやすい提案ができています。', imp:'「〜してほしい」ではなく「〜していただけますか？」と提案形にしましょう。小さな・現実的な変化をお願いするのがポイントです。', ex:sc.ex.S },
+    C:{ label:'C — 代替案', good:'相手が断った場合の選択肢を用意できています。心の余裕につながります。', imp:'相手が「ノー」と言ったときのために、別の選択肢を準備しましょう。脅かすのではなく、お互いにとって現実的な案を。', ex:sc.ex.C },
+  };
+
+  let fbHtml='<div class="desc-fb-wrap">';
+  ['D','E','S','C'].forEach(k=>{
+    const v=vals[k].trim();
+    const ck=checks[k];
+    const hasContent=v.length>0;
+    const isGood=hasContent && v.length>15;
+    fbHtml+=`<div class="desc-fb-item ${isGood?'good':'step'}">
+      <div class="desc-fb-letter ${k}">${ck.label}</div>
+      <div class="desc-fb-text">${hasContent?(isGood?ck.good:ck.imp):'まだ記入がありません。上のヒントを参考に書いてみましょう。'}</div>
+    </div>`;
+  });
+  fbHtml+='</div>';
+
+  fbHtml+=`<div class="desc-ex-block">
+    <div class="desc-ex-title">例文（PDFより）</div>
+    ${['D','E','S','C'].map(k=>`<div class="desc-ex-row"><div class="desc-ex-lbl ${k}">${k}</div><div class="desc-ex-txt">${sc.ex[k]}</div></div>`).join('')}
+  </div>`;
+
+  const fbBox=document.getElementById('descFbBox');
+  fbBox.className='feedback-box show';
+  fbBox.style.background='none';
+  fbBox.style.border='none';
+  fbBox.style.padding='0';
+  fbBox.innerHTML=fbHtml;
+
+  // ボタン更新
+  const old=document.getElementById('btnRow');
+  if(old){
+    const tmp=document.createElement('div');
+    tmp.innerHTML=`<div class="btn-row" id="btnRow">
+      <button class="btn-p" onclick="checkDesc()">もう一度チェック ↗</button>
+      <button class="btn-g" onclick="shuffleDesc()">シャッフル</button>
+      <button class="btn-p" onclick="showComp()">完了 →</button>
+      <button onclick="goLevel(S.level-1)">← 前のレベルへ</button>
+    </div>`;
+    old.replaceWith(tmp.firstChild);
+  }
+}
+
+function shuffleDesc(){
+  S.descSi=(S.descSi+1)%S.descShuffled.length;
+  renderDesc();
+}
+
+function shuffleScene(){
+  S.si=(S.si+1)%S.scenes.length;
+  renderScene();
+}
+
+function goLevel(n){
+  S.level=n; S.fbShown=false;
+  if(n>0){ S.scenes=getScenes(n); S.si=0; }
+  render();
+}
+
+function showComp(){
+  renderDots();
+  document.getElementById('levelPill').textContent='全レベル完了';
+  document.getElementById('levelPill').className='level-pill pill-self';
+  document.getElementById('mainArea').innerHTML=`<div class="card completion">
+    <div class="comp-icon">🌸</div>
+    <div class="comp-ttl">全レベル完了！</div>
+    <div class="comp-msg">レベル1（自己理解）からレベル11（DESC法）まで、すべての練習を終えました。<br><br>アサーションは日々の積み重ねです。難しかったシナリオはまた戻って練習できます。あなたのペースで続けましょう。</div>
+    <div class="btn-row" style="justify-content:center;margin-top:1.5rem;">
+      <button class="btn-p" onclick="resetAll()">最初からやり直す</button>
+      <button onclick="goLevel(10)">レベル11に戻る</button>
+    </div>
+  </div>`;
+}
+
+function resetAll(){
+  S={ level:0, l1q:0, l1ans:Array(10).fill(''), l1why:Array(10).fill(''), scenes:[], si:0, fbShown:false, descSi:0, descShuffled:[] };
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
